@@ -6,6 +6,10 @@ public class Rocket : MonoBehaviour {
 
     [SerializeField] float rotThrust = 200f;
     [SerializeField] float forwardThrust = 800f;
+    [SerializeField] AudioClip mainEngine;
+    [SerializeField] AudioClip death;
+    [SerializeField] AudioClip success;
+
     Rigidbody rigidBody;
     AudioSource audioSource;
 
@@ -22,8 +26,8 @@ public class Rocket : MonoBehaviour {
     void Update() {
         // todo: stop sound on death
         if (state == State.Alive) {
-        Thrust();
-        Rotate();
+            RespondToThrustInput();
+            RespondToRotateInput();
         }
         else{
             
@@ -38,15 +42,26 @@ public class Rocket : MonoBehaviour {
             case "Friendly":
                 break;
             case "Finish":
-                state = State.Transcending;
-                Invoke("LoadNextScene", 1f); // parameterize time
+                StartSuccessSequence();
                 break;
             default:
-                print("dead");
-                state = State.Dying;
-                Invoke("LoadFirstScene", 1f); // parameterize time
+                StartDeathSequence();
                 break;
         }
+    }
+
+    private void StartSuccessSequence() {
+        state = State.Transcending;
+        audioSource.Stop();
+        audioSource.PlayOneShot(success);
+        Invoke("LoadNextScene", 1f); // parameterize time
+    }
+
+    private void StartDeathSequence() {
+        state = State.Dying;
+        audioSource.Stop();
+        audioSource.PlayOneShot(death);
+        Invoke("LoadFirstScene", 1f); // parameterize time
     }
 
     private void LoadFirstScene() {
@@ -57,31 +72,32 @@ public class Rocket : MonoBehaviour {
         SceneManager.LoadScene(1); // todo: allow for more than 2 levels
     }
 
-    private void Thrust() {
+    private void RespondToThrustInput() {
         if (Input.GetKey(KeyCode.Space)) { // can thrust while rotating
-            float thrustThisFrame = forwardThrust * Time.deltaTime;
-            rigidBody.AddRelativeForce(Vector3.up * thrustThisFrame);
-            if (!audioSource.isPlaying) { // so it doesnt layer
-                audioSource.Play();
-            }
+            ApplyThrust();
         }
         else {
             audioSource.Stop();
         }
     }
 
-    private void Rotate() {
+    private void ApplyThrust() {
+        float thrustThisFrame = forwardThrust * Time.deltaTime;
+        rigidBody.AddRelativeForce(Vector3.up * thrustThisFrame);
+        if (!audioSource.isPlaying) { // so it doesnt layer
+            audioSource.PlayOneShot(mainEngine);
+        }
+    }
+
+    private void RespondToRotateInput() {
         rigidBody.freezeRotation = true; // take manual control of rotation
-
         float rotationThisFrame = rotThrust * Time.deltaTime;
-
         if (Input.GetKey(KeyCode.A)) {
             transform.Rotate(Vector3.forward * rotationThisFrame);
         }
         else if (Input.GetKey(KeyCode.D)) {
             transform.Rotate(Vector3.back * rotationThisFrame);
         }
-
         rigidBody.freezeRotation = false; // resume physics control of rotaiton
     }
 }
