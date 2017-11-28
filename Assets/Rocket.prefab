@@ -570,7 +570,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotThrust: 300
-  forwardThrust: 800
+  forwardThrust: 50000
   mainEngine: {fileID: 8300000, guid: d52c9a3b6ec75454ea08f763d9be677e, type: 3}
   death: {fileID: 8300000, guid: 95872ffcb60d9451cb685cfe5f120072, type: 3}
   success: {fileID: 8300000, guid: dca88b3b17e4c4240a8fc462fd785c76, type: 3}
