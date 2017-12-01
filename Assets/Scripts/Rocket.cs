@@ -71,6 +71,7 @@ public class Rocket : MonoBehaviour {
     }
 
     private void LoadFirstScene() {
+        print("load first scene"); 
         SceneManager.LoadScene(0);
     }
 
@@ -94,7 +95,6 @@ public class Rocket : MonoBehaviour {
         if (!audioSource.isPlaying) { // so it doesnt layer
             audioSource.PlayOneShot(mainEngine);
         }
-        print("play particles");
         mainEngineParticles.Play();
     }
 
