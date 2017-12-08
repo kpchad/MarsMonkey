@@ -1,4 +1,5 @@
 ﻿
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,12 +15,12 @@ public class Rocket : MonoBehaviour {
     [SerializeField] ParticleSystem deathParticles;
     [SerializeField] ParticleSystem successParticles;
 
-
     Rigidbody rigidBody;
     AudioSource audioSource;
 
     enum State { Alive, Dying, Transcending }
     State state = State.Alive;
+    bool collisionsDisabled = false;
 
 	// Use this for initialization
 	void Start () {
@@ -36,11 +37,14 @@ public class Rocket : MonoBehaviour {
         }
         else{
         }
+        if (Debug.isDebugBuild){
+            RespondToDebugKeys(); 
+        }
 	}
 
     void OnCollisionEnter(Collision collision){
 
-        if (state != State.Alive){return;}
+        if (state != State.Alive || collisionsDisabled){return;}
 
         switch (collision.gameObject.tag){
             case "Friendly":
@@ -76,7 +80,12 @@ public class Rocket : MonoBehaviour {
     }
 
     private void LoadNextScene() {
-        SceneManager.LoadScene(1); // todo: allow for more than 2 levels
+        int buildIndex = SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = buildIndex + 1;
+        if (nextSceneIndex == SceneManager.sceneCountInBuildSettings){ // change for max number of levels
+            nextSceneIndex = 0; // loop back to start
+        }
+        SceneManager.LoadScene(nextSceneIndex); 
     }
 
     private void RespondToThrustInput() {
@@ -108,5 +117,15 @@ public class Rocket : MonoBehaviour {
             transform.Rotate(Vector3.back * rotationThisFrame);
         }
         rigidBody.freezeRotation = false; // resume physics control of rotaiton
+    }
+
+    private void RespondToDebugKeys() {
+        if (Input.GetKeyDown(KeyCode.L)) {
+            LoadNextScene();
+        }
+        else if (Input.GetKeyDown(KeyCode.C)) {
+            collisionsDisabled = !collisionsDisabled;
+            print(collisionsDisabled);
+        }
     }
 }
